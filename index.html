@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Trò Chơi Của Leo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Quicksand', sans-serif; }
+        .game-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .game-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .bg-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen p-6 flex flex-col items-center">
+
+    <div class="max-w-5xl w-full">
+        <!-- Tiêu đề chính -->
+        <header class="text-center mb-12 mt-8 animate-fade-in">
+            <div class="inline-block p-5 bg-white rounded-full shadow-lg mb-6 border-4 border-indigo-100">
+                <span class="text-7xl block animate-bounce">🚀</span>
+            </div>
+            <h1 class="text-5xl font-black text-indigo-700 mb-3 tracking-tight uppercase">
+                KHO TRÒ CHƠI CỦA LEO
+            </h1>
+            <p class="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
+                Lớp 2A2 • Học giỏi mỗi ngày
+            </p>
+        </header>
+
+        <!-- Lưới danh sách trò chơi -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- THẺ TRÒ CHƠI: CLOCK GAME -->
+            <a href="games/clock/index.html" class="game-card group bg-white rounded-[45px] p-8 shadow-xl border-b-[12px] border-pink-500 block relative overflow-hidden">
+                <!-- Hình nền mờ trang trí -->
+                <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                
+                <div class="bg-pink-50 w-20 h-20 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-inner group-hover:rotate-12 transition-transform">
+                    🐝
+                </div>
+                
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">Clock Game</h2>
+                <p class="text-slate-500 text-sm mt-3 leading-relaxed font-medium">
+                    Giúp bạn Ong xoay đúng hướng để học về "Clockwise" và "Anticlockwise" thật vui!
+                </p>
+                
+                <div class="mt-8 flex items-center text-pink-500 font-black text-sm uppercase tracking-widest">
+                    Bắt đầu ngay
+                    <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 w-5 h-5 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </div>
+            </a>
+
+            <!-- Ô SẮP RA MẮT 1 -->
+            <div class="bg-slate-100 rounded-[45px] p-8 border-4 border-dashed border-slate-300 flex flex-col items-center justify-center text-center opacity-60">
+                <div class="text-5xl mb-4">🎁</div>
+                <h3 class="text-xl font-bold text-slate-400 uppercase tracking-tighter">Trò chơi mới</h3>
+                <p class="text-slate-400 text-xs mt-2">Đang được chuẩn bị cho Leo...</p>
+            </div>
+
+            <!-- Ô SẮP RA MẮT 2 -->
+            <div class="bg-slate-100 rounded-[45px] p-8 border-4 border-dashed border-slate-300 flex flex-col items-center justify-center text-center opacity-60">
+                <div class="text-5xl mb-4">⭐</div>
+                <h3 class="text-xl font-bold text-slate-400 uppercase tracking-tighter">Bí mật</h3>
+                <p class="text-slate-400 text-xs mt-2">Chờ khám phá nhé!</p>
+            </div>
+
+        </div>
+
+        <!-- Chân trang & Lời nhắc -->
+        <footer class="mt-24 text-center pb-12">
+            <div class="inline-flex flex-col items-center bg-white px-10 py-6 rounded-[30px] shadow-sm border border-indigo-50">
+                <p class="text-indigo-400 font-black text-xs uppercase tracking-[0.3em] mb-2">Lời nhắc dành cho Leo</p>
+                <p class="text-slate-600 text-lg font-bold italic">
+                    "Nhớ học từ vựng và chép mỗi từ 3 dòng nhé Leo ơi! 💪"
+                </p>
+            </div>
+            <div class="mt-10 flex justify-center gap-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                <span>Made with ❤️ for Leo</span>
+                <span>•</span>
+                <span>Lớp 2A2</span>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>
