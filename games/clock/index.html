@@ -3,284 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clock Game - Thử Thách Tiếng Việt</title>
+    <title>Đồng hồ & Học tiếng Anh</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Quicksand', sans-serif; }
-        .bee-transition {
-            transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
         }
-        @keyframes fall {
-            to { transform: translateY(600px) rotate(720deg); opacity: 0; }
-        }
-        .confetti-piece {
+
+        .clock-number {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            top: -20px;
-            z-index: 50;
-            pointer-events: none;
-            animation: fall 2s linear forwards;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #0f172a;
+            font-size: 1.125rem;
         }
-        .animate-ping-custom {
-            animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+        .hand {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform-origin: bottom center;
+            border-radius: 9999px;
+            transition: none;
         }
-        @keyframes ping {
-            75%, 100% { transform: scale(2); opacity: 0; }
+
+        .hand-min {
+            width: 0.375rem;
+            height: 6rem;
+            background-color: #2563eb;
+            z-index: 20;
+        }
+
+        .hand-hour {
+            width: 0.5rem;
+            height: 3.5rem;
+            background-color: #0f172a;
+            z-index: 10;
+        }
+
+        /* Animations */
+        .spinning-min {
+            transition: transform 0.7s ease-in-out;
+        }
+
+        .spinning-hour {
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .fade-in-word {
+            animation: fadeInWord 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeInWord {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="bg-pink-50 min-h-screen flex flex-col items-center justify-center p-4 text-slate-800 overflow-hidden">
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
 
-    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 relative">
-        
-        <!-- Container Pháo Hoa -->
-        <div id="confetti-container" class="absolute inset-0 pointer-events-none overflow-hidden z-50"></div>
+    <div class="max-w-md w-full bg-slate-800 p-6 rounded-3xl shadow-2xl border border-slate-700">
+        <h1 class="text-xl font-bold text-center mb-6 text-blue-400 uppercase tracking-wide">
+            Đồng Hồ & Học Tiếng Anh
+        </h1>
 
-        <!-- Header -->
-        <div class="bg-pink-400 p-4 text-white text-center relative z-10 flex flex-col items-center">
-            <a href="../../index.html" class="absolute left-4 top-5 bg-white/20 hover:bg-white/30 p-2 rounded-xl transition-colors shadow-sm" title="Về trang chủ">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            </a>
-
-            <h1 class="text-2xl font-bold uppercase tracking-tighter">Clock Game</h1>
-            <div class="flex justify-center items-center gap-2 text-xs text-pink-100 italic">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-                <span>Bật tiếng để nghe "Pẹt pẹt" nhé!</span>
-            </div>
-            <div id="score-badge" class="hidden absolute top-4 right-4 bg-white text-pink-500 rounded-full px-3 py-1 text-sm font-bold shadow-lg">0</div>
+        <!-- Clock Face -->
+        <div class="relative w-64 h-64 mx-auto mb-8 bg-white rounded-full border-[8px] border-slate-600 shadow-inner">
+            <div id="clock-marks"></div>
+            <div id="clock-numbers"></div>
+            
+            <!-- Hands -->
+            <div id="hour-hand" class="hand hand-hour" style="transform: translateX(-50%) rotate(0deg);"></div>
+            <div id="min-hand" class="hand hand-min" style="transform: translateX(-50%) rotate(0deg);"></div>
+            
+            <!-- Center Pin -->
+            <div class="absolute w-3 h-3 bg-slate-900 rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white z-30 shadow-sm"></div>
         </div>
 
-        <div class="p-6 flex flex-col items-center relative z-10">
-            
-            <!-- MÀN HÌNH BẮT ĐẦU -->
-            <div id="screen-start" class="text-center space-y-6 py-8">
-                <div class="w-32 h-32 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-yellow-300 animate-bounce shadow-inner">
-                    <span class="text-6xl">🐝</span>
-                </div>
-                <h2 class="text-xl font-extrabold text-slate-700 uppercase">Leo sẵn sàng chưa?</h2>
-                <button onclick="startGame()" class="bg-pink-500 hover:bg-pink-600 text-white font-black py-4 px-12 rounded-full text-xl shadow-[0_6px_0_rgb(190,40,110)] active:shadow-none active:translate-y-1 transition-all flex items-center gap-2 mx-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    BẮT ĐẦU
+        <!-- Manual Controls -->
+        <div class="flex flex-col gap-2 mb-4">
+            <!-- Row 1: Backwards -->
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="handleSequentialSpin(-300)" id="btn-back-5" class="control-btn flex flex-col items-center justify-center gap-1 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 rounded-lg text-[10px] font-bold transition-all border border-red-500/20 active:scale-95">
+                    <i data-lucide="history" class="w-4 h-4"></i> -5 PHÚT
+                </button>
+                <button onclick="handleSequentialSpin(-900)" id="btn-back-15" class="control-btn flex flex-col items-center justify-center gap-1 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 rounded-lg text-[10px] font-bold transition-all border border-red-500/20 active:scale-95">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i> -1/4 (15P)
+                </button>
+                <button onclick="handleSequentialSpin(-1800)" id="btn-back-30" class="control-btn flex flex-col items-center justify-center gap-1 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 rounded-lg text-[10px] font-bold transition-all border border-red-500/20 active:scale-95">
+                    <i data-lucide="chevrons-left" class="w-4 h-4"></i> -1/2 (30P)
                 </button>
             </div>
 
-            <!-- MÀN HÌNH CHƠI -->
-            <div id="screen-playing" class="hidden w-full space-y-6">
-                <!-- Thanh Tiến Trình -->
-                <div class="flex items-center gap-2">
-                    <span id="level-text" class="text-xs font-bold text-pink-400">1/10</span>
-                    <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                        <div id="progress-bar" class="h-full bg-pink-400 transition-all duration-500" style="width: 10%"></div>
-                    </div>
-                </div>
-
-                <!-- Ô Nhiệm Vụ (Chỉ tiếng Việt) -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-3xl border-2 border-blue-100 text-center shadow-sm">
-                    <p class="text-blue-500 font-bold text-[10px] uppercase tracking-widest mb-2">Đố Leo biết đây là hướng nào:</p>
-                    <h3 id="task-vi" class="text-2xl font-black text-blue-900 leading-tight">...</h3>
-                </div>
-
-                <!-- Khu Vực Quay -->
-                <div class="relative w-56 h-56 mx-auto my-4">
-                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-pink-100 flex items-center justify-center rotate-45"></div>
-                    <div class="absolute inset-0 rounded-full border-2 border-slate-100 flex items-center justify-center">
-                        <div class="absolute top-2 w-2 h-2 bg-pink-300 rounded-full"></div>
-                        <div class="absolute bottom-2 w-2 h-2 bg-slate-200 rounded-full"></div>
-                        <div class="absolute left-2 w-2 h-2 bg-slate-200 rounded-full"></div>
-                        <div class="absolute right-2 w-2 h-2 bg-slate-200 rounded-full"></div>
-                    </div>
-
-                    <div id="bee-wrapper" class="absolute inset-0 flex items-center justify-center bee-transition" style="transform: rotate(0deg)">
-                        <div class="relative -top-20 text-6xl drop-shadow-lg">
-                            🐝
-                            <span id="sparkle" class="hidden absolute -top-4 -right-2 text-2xl animate-ping-custom">✨</span>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center border border-pink-50">
-                            <div class="w-3 h-3 bg-pink-400 rounded-full animate-pulse"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Danh Sách Nút Bấm (Giữ tiếng Anh) -->
-                <div id="buttons-grid" class="grid grid-cols-2 gap-3 pt-2">
-                    <!-- Nút sẽ được gen bằng JS -->
-                </div>
-
-                <div id="feedback-msg" class="h-10 flex items-center justify-center text-center font-black text-lg transition-transform"></div>
+            <!-- Row 2: Forwards -->
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="handleSequentialSpin(300)" id="btn-fwd-5" class="control-btn flex flex-col items-center justify-center gap-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-[10px] font-bold transition-all border border-slate-600 active:scale-95">
+                    <i data-lucide="timer" class="w-4 h-4"></i> 5 PHÚT
+                </button>
+                <button onclick="handleSequentialSpin(900)" id="btn-fwd-15" class="control-btn flex flex-col items-center justify-center gap-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-[10px] font-bold transition-all border border-slate-600 active:scale-95">
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i> 1/4 (15P)
+                </button>
+                <button onclick="handleSequentialSpin(1800)" id="btn-fwd-30" class="control-btn flex flex-col items-center justify-center gap-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-[10px] font-bold transition-all border border-slate-600 active:scale-95">
+                    <i data-lucide="chevrons-right" class="w-4 h-4"></i> 1/2 (30P)
+                </button>
             </div>
 
-            <!-- MÀN HÌNH KẾT QUẢ -->
-            <div id="screen-result" class="hidden text-center py-6 space-y-4 w-full">
-                <div class="relative inline-block mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto drop-shadow-xl"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
-                    <div class="absolute top-0 -right-4 animate-bounce">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#ec4899" stroke="#ec4899" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    </div>
+            <button onclick="handleSequentialSpin(3600)" id="btn-1h" class="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold shadow-lg active:scale-95 transition-all">
+                <i data-lucide="rotate-cw" id="icon-spin-1h" class="w-5 h-5"></i>
+                QUAY 1 VÒNG (1 GIỜ)
+            </button>
+        </div>
+
+        <!-- English Section -->
+        <div class="mt-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-700 shadow-inner">
+            <div class="flex flex-col items-center gap-4">
+                <div id="word-display" class="h-12 flex flex-wrap items-center justify-center text-center text-lg font-medium text-blue-100 italic">
+                    <!-- Words go here -->
                 </div>
-                <h2 class="text-4xl font-black text-pink-600">THẮNG RỒI!</h2>
-                <div class="bg-gradient-to-b from-pink-50 to-white rounded-3xl p-6 border-2 border-pink-100 shadow-inner">
-                    <p class="text-slate-600 font-bold">Điểm số của Leo:</p>
-                    <p id="final-score" class="text-6xl font-black text-pink-500">0</p>
-                </div>
-                <div class="flex flex-col gap-3 w-full">
-                    <button onclick="startGame()" class="bg-pink-500 hover:bg-pink-600 text-white font-black py-4 px-8 rounded-2xl shadow-[0_4px_0_rgb(190,40,110)] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg>
-                        CHƠI LẠI
+
+                <div class="flex gap-2 w-full">
+                    <button onclick="handleNextWord()" id="btn-next-word" class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-[11px] font-bold transition-all border border-slate-600 active:bg-slate-500">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> TỪ TIẾP THEO
                     </button>
-                    <a href="../../index.html" class="bg-slate-800 hover:bg-black text-white font-black py-4 px-8 rounded-2xl shadow-[0_4px_0_rgb(30,30,30)] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        VỀ TRANG CHỦ
-                    </a>
+                    
+                    <button onclick="handleSpeak()" id="btn-speak" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-bold transition-all border bg-slate-700 hover:bg-blue-900/40 text-blue-400 border-blue-500/30">
+                        <i data-lucide="volume2" class="w-4 h-4"></i> PHÁT ÂM
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="mt-6 p-4 bg-white/50 backdrop-blur rounded-2xl border border-white text-slate-500 text-[11px] text-center max-w-xs shadow-sm">
-        <p class="font-bold text-pink-400 mb-1">📢 LỜI NHẮC CHO LEO</p>
-        Học từ, chép từ 3 dòng nhé! Bữa sau cô kiểm tra đấy!
+        <!-- Bottom Bar -->
+        <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-700">
+            <button onclick="handleReset()" class="p-2 text-slate-500 hover:text-white transition-colors" title="Làm mới">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="px-4 py-1 bg-slate-900 rounded-full border border-slate-700 shadow-inner">
+                <span id="digital-time" class="font-mono text-xl text-blue-400 tracking-widest">00:00</span>
+            </div>
+
+            <button onclick="toggleAutoRun()" id="btn-toggle-run" class="p-2 rounded-full transition-all text-green-400 hover:bg-green-900/20" title="Chạy tự động">
+                <i data-lucide="play" id="icon-play-pause" class="w-6 h-6"></i>
+            </button>
+        </div>
     </div>
 
     <script>
-        // --- DỮ LIỆU ---
-        const vocabulary = [
-            { id: 1, en: 'Clockwise', vi: 'theo chiều kim đồng hồ', change: 90 },
-            { id: 2, en: 'Anticlockwise', vi: 'ngược chiều kim đồng hồ', change: -90 },
-            { id: 3, en: 'A half turn clockwise', vi: 'nửa chiều kim đồng hồ', change: 180 },
-            { id: 4, en: 'A quarter turn clockwise', vi: '1/4 chiều kim đồng hồ', change: 90 },
-            { id: 5, en: 'A half turn anticlockwise', vi: 'nửa ngược chiều kim đồng hồ', change: -180 },
-            { id: 6, en: 'A quarter turn anticlockwise', vi: '1/4 ngược chiều kim đồng hồ', change: -90 },
-            { id: 7, en: 'Right angle', vi: 'góc vuông (90°)', change: 90 },
+        // --- Configuration & State ---
+        const apiKey = ""; 
+        let minSeconds = 0;
+        let hourSeconds = 0;
+        let isRunning = false;
+        let isMinSpinning = false;
+        let isHourSpinning = false;
+        let isSpeaking = false;
+        let revealedWordsCount = 0;
+        let lastTimestamp = 0;
+        const speed = 100;
+
+        const numberToText = [
+            "twelve", "one", "two", "three", "four", "five", "six", 
+            "seven", "eight", "nine", "ten", "eleven", "twelve"
         ];
 
-        let score = 0;
-        let level = 1;
-        let currentAngle = 0;
-        let currentTask = null;
-        let isProcessing = false;
+        // --- Initialization ---
+        function initClock() {
+            const marksContainer = document.getElementById('clock-marks');
+            const numbersContainer = document.getElementById('clock-numbers');
 
-        function playSound(type) {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            if (type === 'success') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-            } else {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(50, ctx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime + 0.15);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+            // Marks
+            for (let i = 0; i < 60; i++) {
+                const mark = document.createElement('div');
+                mark.className = `absolute left-1/2 top-1 w-0.5 ${i % 5 === 0 ? 'h-3 bg-slate-800' : 'h-1.5 bg-slate-400'}`;
+                mark.style.transformOrigin = '50% 120px';
+                mark.style.transform = `translateX(-50%) rotate(${i * 6}deg)`;
+                marksContainer.appendChild(mark);
             }
-            osc.start();
-            osc.stop(ctx.currentTime + 0.3);
+
+            // Numbers
+            for (let i = 1; i <= 12; i++) {
+                const numDiv = document.createElement('div');
+                numDiv.className = 'clock-number';
+                numDiv.innerText = i;
+                const angle = i * 30;
+                numDiv.style.left = '50%';
+                numDiv.style.top = '50%';
+                numDiv.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-95px) rotate(-${angle}deg)`;
+                numbersContainer.appendChild(numDiv);
+            }
+
+            lucide.createIcons();
+            requestAnimationFrame(animate);
         }
 
-        function triggerConfetti() {
-            const container = document.getElementById('confetti-container');
-            const colors = ['#FF69B4', '#FFD700', '#00BFFF', '#32CD32', '#FF4500'];
-            for (let i = 0; i < 30; i++) {
-                const piece = document.createElement('div');
-                piece.className = 'confetti-piece';
-                piece.style.left = Math.random() * 100 + '%';
-                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                piece.style.animationDelay = Math.random() * 0.5 + 's';
-                container.appendChild(piece);
-                setTimeout(() => piece.remove(), 2500);
-            }
+        // --- Core Logic ---
+        function getDisplayTime() {
+            const totalMins = Math.floor(((minSeconds % 3600) + 3600) % 3600 / 60);
+            const totalHrs = Math.floor(((hourSeconds % 43200) + 43200) % 43200 / 3600);
+            return { mins: totalMins, hrs: totalHrs === 0 ? 12 : totalHrs };
         }
 
-        function generateTask() {
-            currentTask = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-            const startAngle = Math.floor(Math.random() * 4) * 90;
-            currentAngle = startAngle;
+        function getTimePhrase() {
+            const { mins, hrs } = getDisplayTime();
+            const displayHrs = hrs;
+            const nextHrs = (displayHrs % 12) + 1;
+
+            if (mins === 0) return `${numberToText[displayHrs]} o'clock`;
+            if (mins === 15) return `quarter past ${numberToText[displayHrs]}`;
+            if (mins === 30) return `half past ${numberToText[displayHrs]}`;
+            if (mins === 45) return `quarter to ${numberToText[nextHrs]}`;
             
-            // Chỉ hiển thị tiếng Việt
-            document.getElementById('task-vi').textContent = currentTask.vi;
-            document.getElementById('bee-wrapper').style.transform = `rotate(${currentAngle}deg)`;
-            document.getElementById('feedback-msg').textContent = '';
-            document.getElementById('feedback-msg').className = 'h-10 flex items-center justify-center text-center font-black text-lg transition-transform';
-            document.getElementById('sparkle').classList.add('hidden');
-            isProcessing = false;
+            if (mins < 30) return `${mins} minutes past ${numberToText[displayHrs]}`;
+            return `${60 - mins} minutes to ${numberToText[nextHrs]}`;
         }
 
-        function startGame() {
-            score = 0;
-            level = 1;
-            document.getElementById('score-badge').textContent = score;
-            document.getElementById('score-badge').classList.remove('hidden');
-            document.getElementById('screen-start').classList.add('hidden');
-            document.getElementById('screen-result').classList.add('hidden');
-            document.getElementById('screen-playing').classList.remove('hidden');
-            initButtons();
-            generateTask();
-            updateProgress();
+        function updateClockUI() {
+            const minHand = document.getElementById('min-hand');
+            const hourHand = document.getElementById('hour-hand');
+            const digitalDisplay = document.getElementById('digital-time');
+
+            const minDeg = minSeconds * 0.1;
+            const hourDeg = hourSeconds * (360 / 43200);
+
+            minHand.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+            hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+            const { mins, hrs } = getDisplayTime();
+            digitalDisplay.innerText = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
+            updateEnglishPhrase();
         }
 
-        function updateProgress() {
-            document.getElementById('level-text').textContent = `${level}/10`;
-            document.getElementById('progress-bar').style.width = `${(level/10)*100}%`;
-        }
-
-        function checkAnswer(selectedChange) {
-            if (isProcessing) return;
-            const feedbackEl = document.getElementById('feedback-msg');
-            if (selectedChange === currentTask.change) {
-                isProcessing = true;
-                playSound('success');
-                score += 10;
-                document.getElementById('score-badge').textContent = score;
-                feedbackEl.textContent = 'Đúng rồi! Leo giỏi quá! 🌟';
-                feedbackEl.className = 'h-10 flex items-center justify-center text-center font-black text-lg transition-transform text-green-500 scale-110';
-                triggerConfetti();
-                document.getElementById('sparkle').classList.remove('hidden');
-                currentAngle += currentTask.change;
-                document.getElementById('bee-wrapper').style.transform = `rotate(${currentAngle}deg)`;
-                setTimeout(() => {
-                    if (level < 10) { level++; updateProgress(); generateTask(); } 
-                    else { showResult(); }
-                }, 2000);
-            } else {
-                playSound('fail');
-                feedbackEl.textContent = 'Pẹt pẹt... Sai rồi! Thử lại nha! 🐝';
-                feedbackEl.className = 'h-10 flex items-center justify-center text-center font-black text-lg transition-transform text-orange-500';
+        function updateEnglishPhrase() {
+            const container = document.getElementById('word-display');
+            const phrase = getTimePhrase();
+            const words = phrase.split(" ");
+            
+            container.innerHTML = "";
+            for (let i = 0; i < Math.min(revealedWordsCount, words.length); i++) {
+                const span = document.createElement('span');
+                span.className = "mr-1 fade-in-word";
+                span.innerText = words[i];
+                container.appendChild(span);
             }
         }
 
-        function showResult() {
-            document.getElementById('screen-playing').classList.add('hidden');
-            document.getElementById('screen-result').classList.remove('hidden');
-            document.getElementById('final-score').textContent = score;
-            document.getElementById('score-badge').classList.add('hidden');
+        // --- Animation & Interaction ---
+        function animate(timestamp) {
+            if (lastTimestamp && isRunning) {
+                const deltaTime = (timestamp - lastTimestamp) / 1000;
+                const increment = deltaTime * speed;
+                minSeconds += increment;
+                hourSeconds += increment;
+                updateClockUI();
+            }
+            lastTimestamp = timestamp;
+            requestAnimationFrame(animate);
         }
 
-        function initButtons() {
-            const grid = document.getElementById('buttons-grid');
-            grid.innerHTML = '';
-            vocabulary.forEach(word => {
-                const btn = document.createElement('button');
-                btn.className = `p-3 rounded-2xl text-[10px] font-black transition-all shadow-[0_4px_0_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-1 border text-white ${word.change > 0 ? 'bg-orange-400 border-orange-500' : 'bg-purple-500 border-purple-600'}`;
-                const iconHtml = word.change > 0 
-                    ? `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M21 13a9 9 0 1 1-3-7.7L21 8"></path></svg>`
-                    : `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"></path><path d="M3 13a9 9 0 1 0 3-7.7L3 8"></path></svg>`;
-                btn.innerHTML = `<div class="flex flex-col items-center gap-1">${iconHtml}<span class="uppercase text-center leading-none">${word.en}</span></div>`;
-                btn.onclick = () => checkAnswer(word.change);
-                grid.appendChild(btn);
-            });
+        async function handleSequentialSpin(secondsToAdd) {
+            if (isMinSpinning || isHourSpinning || isRunning) return;
+
+            // Reset English reveal when time changes
+            revealedWordsCount = 0;
+
+            const minHand = document.getElementById('min-hand');
+            const hourHand = document.getElementById('hour-hand');
+
+            // Phase 1: Minute Hand
+            isMinSpinning = true;
+            minHand.classList.add('spinning-min');
+            minSeconds += secondsToAdd;
+            updateClockUI();
+
+            const delay = Math.abs(secondsToAdd) <= 300 ? 400 : 750;
+            await new Promise(r => setTimeout(r, delay));
+            minHand.classList.remove('spinning-min');
+            isMinSpinning = false;
+
+            // Phase 2: Hour Hand
+            isHourSpinning = true;
+            hourHand.classList.add('spinning-hour');
+            hourSeconds += secondsToAdd;
+            updateClockUI();
+
+            await new Promise(r => setTimeout(r, 550));
+            hourHand.classList.remove('spinning-hour');
+            isHourSpinning = false;
         }
+
+        function handleNextWord() {
+            const phrase = getTimePhrase();
+            const words = phrase.split(" ");
+            if (revealedWordsCount < words.length) {
+                revealedWordsCount++;
+                updateEnglishPhrase();
+            }
+        }
+
+        function toggleAutoRun() {
+            if (isMinSpinning || isHourSpinning) return;
+            isRunning = !isRunning;
+            const btn = document.getElementById('btn-toggle-run');
+            const icon = document.getElementById('icon-play-pause');
+            
+            if (isRunning) {
+                btn.classList.replace('text-green-400', 'text-red-400');
+                icon.setAttribute('data-lucide', 'pause');
+                revealedWordsCount = 0;
+            } else {
+                btn.classList.replace('text-red-400', 'text-green-400');
+                icon.setAttribute('data-lucide', 'play');
+            }
+            lucide.createIcons();
+        }
+
+        function handleReset() {
+            isRunning = false;
+            minSeconds = 0;
+            hourSeconds = 0;
+            revealedWordsCount = 0;
+            isMinSpinning = false;
+            isHourSpinning = false;
+            
+            const icon = document.getElementById('icon-play-pause');
+            icon.setAttribute('data-lucide', 'play');
+            document.getElementById('btn-toggle-run').classList.replace('text-red-400', 'text-green-400');
+            
+            updateClockUI();
+            lucide.createIcons();
+        }
+
+        // --- TTS Engine ---
+        async function handleSpeak() {
+            if (isSpeaking) return;
+            isSpeaking = true;
+            const btn = document.getElementById('btn-speak');
+            const phrase = getTimePhrase();
+
+            btn.classList.add('bg-blue-600', 'text-white', 'animate-pulse');
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Say clearly: ${phrase}` }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                const audioData = result.candidates[0].content.parts[0].inlineData.data;
+                const mimeType = result.candidates[0].content.parts[0].inlineData.mimeType;
+                const sampleRate = parseInt(mimeType.split('rate=')[1]) || 24000;
+                
+                const binaryString = atob(audioData);
+                const pcmData = new Int16Array(binaryString.length / 2);
+                for (let i = 0; i < pcmData.length; i++) {
+                    pcmData[i] = (binaryString.charCodeAt(i * 2 + 1) << 8) | binaryString.charCodeAt(i * 2);
+                }
+                
+                const wavBlob = pcmToWav(pcmData, sampleRate);
+                const audio = new Audio(URL.createObjectURL(wavBlob));
+                audio.onended = () => {
+                    isSpeaking = false;
+                    btn.classList.remove('bg-blue-600', 'text-white', 'animate-pulse');
+                };
+                audio.play();
+            } catch (error) {
+                console.error("TTS Error:", error);
+                isSpeaking = false;
+                btn.classList.remove('bg-blue-600', 'text-white', 'animate-pulse');
+            }
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcmData.length * 2);
+            const view = new DataView(buffer);
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+            writeString(0, 'RIFF');
+            view.setUint32(4, 32 + pcmData.length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, pcmData.length * 2, true);
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(44 + i * 2, pcmData[i], true);
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        // Start App
+        window.onload = initClock;
     </script>
 </body>
 </html>
